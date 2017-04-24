@@ -1,0 +1,18 @@
+language: java
+jdk:
+- oraclejdk8
+before_deploy:
+  - ./gradlew generatePomFileForMavenPublication
+deploy:
+  - provider: "s3"
+    upload-dir: "output"
+    bucket: "cromulence.travis.objecttranslator"
+    access_key_id: ""
+    secret_access_key:
+      secure: q9.......
+  - provider: "bintray"
+    file: "bintray.json"
+    user: "cromulence"
+    key:
+      secure: .......
+    dry-run: false

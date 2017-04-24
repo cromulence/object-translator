@@ -1,0 +1,371 @@
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'
+        classpath 'gradle.plugin.co.riiid:gradle-github-plugin:0.4.2'     
+        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.6.1"
+    }
+}
+
+//plugins loaded from special gradle plugin repo...
+plugins {
+    //google "gradle build scan" or https://github.com/gradle/gradle-build-scan-quickstart
+    // essentially, ./gradlew build -Dscan
+    id 'com.gradle.build-scan' version '1.0' //google "gradle build scan"
+}
+
+//This is only used in the master project to close a repo and promote with nexus..(and the plugin only allows top level usage)
+apply plugin: 'io.codearte.nexus-staging'
+
+apply plugin: 'java'
+//apply plugin: 'checkstyle'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'signing'
+apply plugin: 'maven'
+
+group = 'net.cromulence'
+   if(project.hasProperty('projVersion')) {
+     project.version = '1.9.'+project.projVersion
+     println("CREATING RELEASE VERSION "+project.version)
+   } else {
+     project.version = '1.9-developer'
+     println("CREATING DEVELOPER VERSION "+version)
+   }
+
+ext {
+    // Project constants
+
+    /*
+     * Dependencies can be named so that sub-projects can reference consistent version of them.
+     * dependencies {
+     *     compile deps['joda-time']
+     * }
+     */
+    deps = [
+       'junit':           'junit:junit:4.11',  
+       'groovy':          'org.codehaus.groovy:groovy-all:2.4.6',
+
+       //We literally ONLY bring this in for one method call into PropertyUtils so we should clone that code
+       //instead of bringing in an entire jar perhaps...?
+       'commons-beans':   'commons-beanutils:commons-beanutils:1.9.2',
+
+       'javax-inject':    'javax.inject:javax.inject:1',
+       'slf4j-api':       'org.slf4j:slf4j-api:1.7.21',
+       //do we need this one...
+       //'logback-core':  'ch.qos.logback:logback-core:1.1.7', 
+       'logback-classic': 'ch.qos.logback:logback-classic:1.1.7',
+       'joda-time':       'joda-time:joda-time:2.9.4',
+       'guice':           'com.google.inject:guice:4.0',
+       'guice-multibindings': 'com.google.inject.extensions:guice-multibindings:4.0',
+       'guava':           'com.google.guava:guava:19.0',
+       'eclipse-compiler':'org.eclipse.jdt.core.compiler:ecj:4.5.1',
+       'apache-commons-io': 'commons-io:commons-io:2.4',
+       'metrics':         'io.dropwizard.metrics:metrics-core:3.1.0',
+       'log4jdbc':        'com.googlecode.log4jdbc:log4jdbc:1.2',
+    ]
+
+}
+
+
+//Section needed by the above com.gradle.build-scan plugin that was added
+buildScan {
+    licenseAgreementUrl = 'https://gradle.com/terms-of-service'
+    licenseAgree = 'yes'
+}
+
+
+allprojects {
+   apply plugin: 'jacoco' //code coverage
+
+   buildDir = file('output')
+
+   repositories {
+      jcenter()
+   }
+
+   jacoco {
+      toolVersion = '0.7.1.201405082137'
+   }
+}
+
+  apply plugin: 'maven-publish'
+ 
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            pom.withXml {
+                asNode().dependencies.'*'.findAll() {
+                    it.scope.text() == 'runtime' && project.configurations.compile.allDependencies.find { dep ->
+                        dep.name == it.artifactId.text()
+                    }
+                }.each() {
+                    it.scope*.value = 'compile'
+                }
+            }
+        }
+    }
+}
+ 
+model {
+    tasks.generatePomFileForMavenPublication {
+        destination = file("$buildDir/libs/bintray-demo-1.0.0.pom")
+    }
+}
+
+subprojects {
+   apply plugin: 'java'
+   //apply plugin: 'checkstyle'
+   apply plugin: 'eclipse'
+   apply plugin: 'idea'
+   apply plugin: 'signing'
+   apply plugin: 'maven'
+
+
+
+   
+
+   ext {
+      //This is an input directory that we read jars from if they are not in a repo somewhere
+      fixedLibDir = file('lib')
+      toStagingDir = file(new File(buildDir, 'alljars'))
+      github_org = 'cromulence'
+      project_name = 'ObjectTranslator'
+   }
+   //doing this modifies the mvn artifact id and we can't seem to reset it
+   //archivesBaseName = "webpieces-${it.name}"
+
+   //checkstyle {
+   //    configFile = rootProject.file('config/checkstyle.xml')
+   //    toolVersion = "5.9"
+   //}
+
+   repositories {
+       mavenCentral()
+   }
+   dependencies {
+       testCompile deps['junit']
+       //for logging in tests
+       testCompile deps['groovy']
+
+       compile deps['javax-inject']
+       compile deps['slf4j-api']
+       //do we need this one..
+       //compile deps['logback-core']
+       compile deps['logback-classic']
+       compile deps['joda-time']
+
+       //This line includes any jars a developer drops into {project}/lib directory
+       compile fileTree(dir: 'lib', include: '*.jar')
+   }
+
+   //We could do this just for the template projects, BUT during debugging, it is sooo
+   //damn nice to have the var names, it is worth the performance penalty I think though
+   //we could change this
+   [compileJava, compileTestJava]*.options.collect {options ->
+     options.compilerArgs.add '-parameters'
+   }
+
+   if (JavaVersion.current().isJava8Compatible()) {
+     tasks.withType(Javadoc) {
+        // disable the crazy super-strict doclint tool in Java 8
+        //noinspection SpellCheckingInspection
+        options.addStringOption('Xdoclint:none', '-quiet')
+     }
+   }
+
+   jar {
+      //TODO: Share the source and binary manifest code!!! so changes are done in one place
+      manifest {
+        def git_cmd = "git rev-parse HEAD"
+        def git_proc = git_cmd.execute()
+        ext.revision = git_proc.text.trim()
+        attributes("Implementation-Title": project.name,
+                   "Implementation-Version": version,
+                   "SCM-Revision": revision
+                   )
+      }
+   }
+
+   task javadocJar(type: Jar, dependsOn: javadoc) {
+      classifier = 'javadoc'
+      from 'build/docs/javadoc'
+      manifest {
+        def git_cmd = "git rev-parse HEAD"
+        def git_proc = git_cmd.execute()
+        ext.revision = git_proc.text.trim()
+        attributes("Implementation-Title": project.name,
+                   "Implementation-Version": version,
+                   "SCM-Revision": revision
+                   )
+      }
+   }
+
+   task sourcesJar(type: Jar) {
+      classifier = 'sources'
+      from sourceSets.main.allSource
+      manifest {
+        def git_cmd = "git rev-parse HEAD"
+        def git_proc = git_cmd.execute()
+        ext.revision = git_proc.text.trim()
+        attributes("Implementation-Title": project.name,
+                   "Implementation-Version": version,
+                   "SCM-Revision": revision
+                   )
+      }
+   }
+
+   artifacts {
+        archives jar
+        archives javadocJar
+        archives sourcesJar
+   }
+
+   if(project.hasProperty('projVersion')) {
+       signing {
+          sign configurations.archives
+       }
+   }
+
+   //This is really only needed for devrouter, embeddablewebserver, http-client, and embeddablehttpproxy
+   //I wonder if we can list out those few projects and this task to each one and the assemble.dependsOn as well
+   //let's at least copy all jars to a single directory to use in creating an application...
+   //ALSO, this DELETES jars we no longer use so it has to be different directory than the dest jar we are creating as well
+   task syncJars(type: Sync, dependsOn: 'jar') {
+       from(configurations.compile) {}
+       from(fixedLibDir) {}
+       from(libsDir) {}
+       into toStagingDir
+   }
+
+   assemble.dependsOn('syncJars')
+
+   test{
+      beforeTest{ descr ->
+        logger.warn("Starting Test ${descr.className} : ${descr.name}")
+      }
+      afterTest { descr, result ->
+        def totalTime = result.endTime - result.startTime
+        logger.warn("Test complete ${descr.className} : ${descr.name} TOTAL TIME=${totalTime}")
+      }
+      testLogging {
+        events "failed"
+        exceptionFormat "full"
+      }
+   }
+
+   //Using eclipse bin folder is WAY too common.  use outputeclipse instead so we can safely ignore it
+   eclipse {
+      classpath {
+         defaultOutputDir = file('eclipse-output')
+      }
+   }
+
+   eclipseProject {
+      doLast {
+         // https://discuss.gradle.org/t/how-to-write-properties-to-3rd-party-eclipse-settings-files/6499/2
+
+         def props = new Properties()
+         file(".settings/org.eclipse.jdt.core.prefs").withInputStream {
+            stream -> props.load(stream)
+         }
+         props.setProperty("org.eclipse.jdt.core.compiler.codegen.methodParameters", "generate")
+         file(".settings/org.eclipse.jdt.core.prefs").withOutputStream {
+            stream -> props.store(stream, null)
+         }
+      }
+   }
+
+   //we only want to upload if the build passed first..ie. tests, etc.
+   uploadArchives.dependsOn('build')
+   uploadArchives {
+      repositories {
+        mavenDeployer {
+
+            if(project.hasProperty('projVersion')) {
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+                if("".equals(project.projVersion.trim())) {
+                    throw new InvalidUserDataException("-PprojVersion property was not defined and must be when uploadArchives is run");
+                }
+                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                    authentication(userName: sonatypeUsername, password: sonatypePassword)
+                }
+            } else {
+                repository(url: "file://localhost/tmp/myRepo/")
+            }
+
+            pom.project {
+              name project.name 
+              description 'Someone forgot to fill this in.  See http://stackoverflow.com/questions/38272550/how-to-fail-the-gradle-build-if-subproject-is-missing-a-property'
+              url "https://github.com/${github_org}/${project_name}"
+              licenses {
+                 license {
+                    name 'Apache License 2.0'
+                    url 'http://www.apache.org/licenses/LICENSE-2.0'
+                    distribution 'repo'
+                 }
+              }
+              scm {
+                 url "https://github.com/${github_org}/${project_name}.git"
+                 connection "scm:git:https://github.com/${github_org}/${project_name}.git"
+                 developerConnection "scm:git:git@github.com:${github_org}/${project_name}.git"
+              }
+              organization {
+                 name github_org
+                 url "https://github.com/${github_org}"
+              }
+              developers {
+                  developer {
+                      id 'cromulence'
+                      name 'cromulence'
+                  }
+              }
+            }
+        }
+      }
+   }
+
+}
+
+
+if(project.hasProperty('projVersion')) {
+    nexusStaging {  
+        packageGroup = 'net.cromulence'
+        stagingProfileId = '683f50db65952'
+        username = sonatypeUsername
+        password = sonatypePassword
+    }
+}
+
+//TODO: Create uploadArchivesLocal in subprojects, and create integrationTestTemplate that depends on ALL those
+//and depends on :webserver:build and run ./gradlew xxxx to create template and then runs ./gradlew test in the
+//created template and all tests should pass which would guarantee the template is still working and not broken
+//We will do this if we see it breaking now and then if needed to prevent breaks
+//task integrationTestTemplate
+
+task uploadArchives2 << { }
+
+uploadArchives2.dependsOn {
+    project.subprojects.collectMany { project -> project.tasks }.findAll { task -> task.name.equals("uploadArchives") }
+}
+
+closeRepository.dependsOn('uploadArchives2')
+promoteRepository.dependsOn('closeRepository')
+promoteRepository.doFirst {
+  println("sleeping after close repo and before promote or promote fails")
+  Thread.sleep(30000)
+  println("done sleeping go promote repo now");
+}
+
+task printTasks << {
+    project.tasks.collect { task -> println("task="+task+" dependsOn="+task.dependsOn) }
+}
+
+task release()
+
