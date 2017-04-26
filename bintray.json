@@ -5,7 +5,7 @@
 
     "package": {
         "name": "ObjectTranslator", // Bintray package name
-        "repo": "cromulence", // Bintray repository name
+        "repo": "maven", // Bintray repository name
         "subject": "cromulence", // Bintray subject (user or organization)
         "desc": "I was pushed completely automatically",
         "website_url": "http://github.com/cromulence/ObjectTranslator",
