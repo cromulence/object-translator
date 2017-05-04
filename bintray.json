@@ -4,13 +4,13 @@
        fields are mandatory. */
 
     "package": {
-        "name": "ObjectTranslator", // Bintray package name
+        "name": "object-translator", // Bintray package name
         "repo": "maven", // Bintray repository name
         "subject": "cromulence", // Bintray subject (user or organization)
         "desc": "I was pushed completely automatically",
-        "website_url": "http://github.com/cromulence/ObjectTranslator",
-        "issue_tracker_url": "http://github.com/cromulence/ObjectTranslator/issues",
-        "vcs_url": "http://github.com/cromulence/ObjectTranslator.git",
+        "website_url": "http://github.com/cromulence/object-translator",
+        "issue_tracker_url": "http://github.com/cromulence/object-translator/issues",
+        "vcs_url": "http://github.com/cromulence/object-translator.git",
         "github_use_tag_release_notes": true,
         "github_release_notes_file": "RELEASE.txt",
         "licenses": ["Apache-2.0"],
@@ -48,7 +48,7 @@
     "files":
         [
             {
-                "includePattern": "output/libs/(.*jar)$", "uploadPattern": "net/cromulence/ObjectTranslator/1.9-developer/$1"            }
+                "includePattern": "output/libs/(.*jar)$", "uploadPattern": "net/cromulence/object-translator/1.9-developer/$1"            }
         ],
     "publish": true
 }
