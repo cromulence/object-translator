@@ -135,7 +135,7 @@ subprojects {
       fixedLibDir = file('lib')
       toStagingDir = file(new File(buildDir, 'alljars'))
       github_org = 'cromulence'
-      project_name = 'ObjectTranslator'
+      project_name = 'object-translator'
    }
    //doing this modifies the mvn artifact id and we can't seem to reset it
    //archivesBaseName = "webpieces-${it.name}"
