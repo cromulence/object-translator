@@ -28,17 +28,11 @@ apply plugin: 'idea'
 apply plugin: 'signing'
 apply plugin: 'maven'
 
-group = 'net.cromulence'
-   if(project.hasProperty('projVersion')) {
-     project.version = '1.9.'+project.projVersion
-     println("CREATING RELEASE VERSION "+project.version)
-   } else {
-     project.version = '1.9-developer'
-     println("CREATING DEVELOPER VERSION "+version)
-   }
 
 ext {
     // Project constants
+
+    majorMinorVersion = "1.9"
 
     /*
      * Dependencies can be named so that sub-projects can reference consistent version of them.
@@ -71,6 +65,14 @@ ext {
 
 }
 
+group = 'net.cromulence'
+if(project.hasProperty('projVersion')) {
+  project.version = ext.majorMinorVersion + '.' + project.projVersion
+  println("CREATING RELEASE VERSION " + project.version)
+} else {
+  project.version = ext.majorMinorVersion + '-SNAPSHOT'
+  println("CREATING SNAPSHOT VERSION " + project.version)
+}
 
 //Section needed by the above com.gradle.build-scan plugin that was added
 buildScan {
@@ -337,7 +339,7 @@ subprojects {
 if(project.hasProperty('projVersion')) {
     nexusStaging {  
         packageGroup = 'net.cromulence'
-        stagingProfileId = '683f50db65952'
+        //stagingProfileId = '683f50db65952'
         username = sonatypeUsername
         password = sonatypePassword
     }
