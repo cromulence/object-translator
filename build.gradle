@@ -264,8 +264,8 @@ subprojects {
    }
 
     task copyBintrayTemplate (type: Copy) {
-        from "${projectDir}/templates"
-        into "${project.buildDir}"
+        from "${projectDir}"
+        into "${projectDir}"
         include 'bintray.json.template'
         rename { file -> 'bintray.json' }
         expand (version: version, date: releaseDate(), tag: tagName ())
