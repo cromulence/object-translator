@@ -85,7 +85,7 @@ if(System.getenv("TRAVIS_TAG") != null && System.getenv("TRAVIS_TAG").length() >
     project.version = ext.majorMinorVersion + '.' + tagName
     println("Version not as expected: " + project.version)
   }
-} else if(system.getEnv("TRAVIS")) { // DODO what this
+} else if(System.getenv("TRAVIS") != null && System.getenv("TRAVIS").length() > 0) {
   // travis master build
   project.version = ext.majorMinorVersion + '-SNAPSHOT'
   println("Building master " + project.version)
