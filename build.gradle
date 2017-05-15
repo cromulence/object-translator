@@ -70,7 +70,7 @@ ext {
 group = 'net.cromulence'
 
 // is there a travis tag?
-if(System.getenv("TRAVIS_TAG") != null && System.getenv("TRAVIS_TAG".length() > 0)) {
+if(System.getenv("TRAVIS_TAG") != null && System.getenv("TRAVIS_TAG").length() > 0) {
   // we are building a tag on travis
   String tagName = System.getenv("TRAVIS_TAG")
 
