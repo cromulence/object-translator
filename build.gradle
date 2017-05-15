@@ -1,3 +1,5 @@
+import java.text.SimpleDateFormat
+
 buildscript {
     repositories {
         jcenter()
@@ -66,12 +68,31 @@ ext {
 }
 
 group = 'net.cromulence'
-if(project.hasProperty('projVersion')) {
-  project.version = ext.majorMinorVersion + '.' + project.projVersion
-  println("CREATING RELEASE VERSION " + project.version)
-} else {
+
+// is there a travis tag?
+if(System.getenv("TRAVIS_TAG") != null && System.getenv("TRAVIS_TAG".length() > 0)) {
+  // we are building a tag on travis
+  String tagName = System.getenv("TRAVIS_TAG")
+
+  println("Travis tag build")
+
+  if(tagName.startsWith(ext.majorMinorVersion)) {
+    //we're building a tag in line with the current expected version'
+    project.version = tagName
+    println("Version as expected " + project.version)
+  } else {
+    // name is messed up
+    project.version = ext.majorMinorVersion + '.' + tagName
+    println("Version not as expected: " + project.version)
+  }
+} else if(system.getEnv("TRAVIS")) { // DODO what this
+  // travis master build
   project.version = ext.majorMinorVersion + '-SNAPSHOT'
-  println("CREATING SNAPSHOT VERSION " + project.version)
+  println("Building master " + project.version)
+} else {
+  //local build
+  project.version = ext.majorMinorVersion + '-SNAPSHOT'
+  println("Building local " + project.version)
 }
 
 //Section needed by the above com.gradle.build-scan plugin that was added
@@ -127,10 +148,6 @@ subprojects {
    apply plugin: 'idea'
    apply plugin: 'signing'
    apply plugin: 'maven'
-
-
-
-   
 
    ext {
       //This is an input directory that we read jars from if they are not in a repo somewhere
@@ -245,6 +262,23 @@ subprojects {
        into toStagingDir
    }
 
+    task copyBintrayTemplate (type: Copy) {
+        from "${projectDir}/templates"
+        into "${project.buildDir}"
+        include 'bintray.json.template'
+        rename { file -> 'bintray.json' }
+        expand (version: version, date: releaseDate(), tag: tagName ())
+    }
+
+  task copyPOMTemplate (type: Copy) {
+    from "${projectDir}/templates"
+    into "${buildDir}/libs"
+    include 'pom.xml.template'
+    rename { file -> "${project.name}-${project.version}.pom" }
+    expand (version: version)
+  }
+
+   assemble.dependsOn copyBintrayTemplate
    assemble.dependsOn('syncJars')
 
    test{
@@ -371,3 +405,10 @@ task printTasks << {
 
 task release()
 
+def releaseDate() {
+  new SimpleDateFormat("yyyy-MM-dd").format (new Date())
+}
+
+def tagName() {
+  System.getenv("TRAVIS_TAG")
+}
