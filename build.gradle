@@ -140,6 +140,9 @@ model {
     tasks.generatePomFileForMavenPublication {
         destination = file("$buildDir/libs/bintray-demo-1.0.0.pom")
     }
+    tasks.bintrayJson {
+
+    }
 }
 
 subprojects {
@@ -263,13 +266,7 @@ subprojects {
        into toStagingDir
    }
 
-    task copyBintrayTemplate (type: Copy) {
-        from "${projectDir}"
-        into "${projectDir}"
-        include 'bintray.json.template'
-        rename { file -> 'bintray.json' }
-        expand (version: version, date: releaseDate(), tag: tagName ())
-    }
+    
 
    assemble.dependsOn('copyBintrayTemplate')
    //assemble.dependsOn('syncJars')
@@ -390,6 +387,14 @@ promoteRepository.doFirst {
   println("sleeping after close repo and before promote or promote fails")
   Thread.sleep(30000)
   println("done sleeping go promote repo now");
+}
+
+task copyBintrayTemplate (type: Copy) {
+  from "${projectDir}"
+  into "${projectDir}"
+  include 'bintray.json.template'
+  rename { file -> 'bintray.json' }
+  expand (version: version, date: releaseDate(), tag: tagName ())
 }
 
 task printTasks << {
