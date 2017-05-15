@@ -7,7 +7,7 @@
         "name": "object-translator", // Bintray package name
         "repo": "maven", // Bintray repository name
         "subject": "cromulence", // Bintray subject (user or organization)
-        "desc": "I was pushed completely automatically",
+        "desc": "Standalone instance of ObjectTranslator from deanhiller/webpieces",
         "website_url": "http://github.com/cromulence/object-translator",
         "issue_tracker_url": "http://github.com/cromulence/object-translator/issues",
         "vcs_url": "http://github.com/cromulence/object-translator.git",
@@ -22,10 +22,10 @@
        In case the version already exists on Bintray, only the name fields is mandatory. */
 
     "version": {
-        "name": "2",
-        "desc": "Test release 2",
-        "released": "2017-05-14",
-        "vcs_tag": "2",
+        "name": "{version}",
+        "desc": "Release {version}",
+        "released": "{date}",
+        "vcs_tag": "{tag}",
         "gpgSign": false
     },
 
@@ -45,10 +45,11 @@
 
     Note: Regular expressions defined as part of the includePattern property must be wrapped with brackets. */
 
-    "files":
-        [
-            {
-                "includePattern": "output/libs/(.*jar)$", "uploadPattern": "net/cromulence/object-translator/1.9-developer/$1"            }
-        ],
+    "files": [
+        {
+            "includePattern": "output/libs/(.*jar)$",
+            "uploadPattern": "net/cromulence/object-translator/%VERSION%/$1"
+        }
+    ],
     "publish": true
 }
