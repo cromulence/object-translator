@@ -272,7 +272,7 @@ subprojects {
     }
 
    assemble.dependsOn('copyBintrayTemplate')
-   assemble.dependsOn('syncJars')
+   //assemble.dependsOn('syncJars')
 
    test{
       beforeTest{ descr ->
