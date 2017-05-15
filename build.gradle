@@ -86,6 +86,7 @@ if(System.getenv("TRAVIS_TAG") != null && System.getenv("TRAVIS_TAG").length() >
     println("Version not as expected: " + project.version)
   }
 } else if(System.getenv("TRAVIS") != null && System.getenv("TRAVIS").length() > 0) {
+} else if(System.getenv("TRAVIS") != null && System.getenv("TRAVIS").length() > 0) {
   // travis master build
   project.version = ext.majorMinorVersion + '-SNAPSHOT'
   println("Building master " + project.version)
@@ -270,15 +271,7 @@ subprojects {
         expand (version: version, date: releaseDate(), tag: tagName ())
     }
 
-  task copyPOMTemplate (type: Copy) {
-    from "${projectDir}/templates"
-    into "${buildDir}/libs"
-    include 'pom.xml.template'
-    rename { file -> "${project.name}-${project.version}.pom" }
-    expand (version: version)
-  }
-
-   assemble.dependsOn copyBintrayTemplate
+   assemble.dependsOn('copyBintrayTemplate')
    assemble.dependsOn('syncJars')
 
    test{
