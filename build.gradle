@@ -140,9 +140,6 @@ model {
     tasks.generatePomFileForMavenPublication {
         destination = file("$buildDir/libs/bintray-demo-1.0.0.pom")
     }
-    tasks.bintrayJson {
-
-    }
 }
 
 subprojects {
