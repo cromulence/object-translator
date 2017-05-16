@@ -387,8 +387,8 @@ promoteRepository.doFirst {
 }
 
 task copyBintrayTemplate (type: Copy) {
-  from "${projectDir}"
-  into "${projectDir}"
+  from projectDir
+  into projectDir
   include 'bintray.json.template'
   rename { file -> 'bintray.json' }
   expand (version: version, date: releaseDate(), tag: tagName ())
