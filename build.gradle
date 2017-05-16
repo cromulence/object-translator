@@ -373,6 +373,14 @@ task copyBintrayTemplate (type: Copy,  dependsOn: "getProjectVersion") {
 
 task getProjectVersion << {
 // is there a travis tag?
+
+  println "getProjectVersion in"
+  println "travistag"
+  println System.getenv("TRAVIS_TAG")
+  println "travis"
+  println System.getenv("TRAVIS")
+  println "getProjectVersion carry on"
+
   if(System.getenv("TRAVIS_TAG") != null && System.getenv("TRAVIS_TAG").length() > 0) {
     // we are building a tag on travis
     String tagName = System.getenv("TRAVIS_TAG")
@@ -388,7 +396,6 @@ task getProjectVersion << {
       project.version = "${majorMinorVersion}.${tagName}"
       println "Version not as expected: ${project.version}"
     }
-  } else if(System.getenv("TRAVIS") != null && System.getenv("TRAVIS").length() > 0) {
   } else if(System.getenv("TRAVIS") != null && System.getenv("TRAVIS").length() > 0) {
     // travis master build
     project.version = "${majorMinorVersion}-SNAPSHOT"
