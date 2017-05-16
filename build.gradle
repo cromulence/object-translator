@@ -367,7 +367,7 @@ task copyBintrayTemplate (type: Copy,  dependsOn: "getProjectVersion") {
   from projectDir
   into projectDir
   include 'bintray.json.template'
-  rename { file -> 'bintray.json' }
+  rename { file -> 'bintray2.json' }
   expand (version: project.version, date: releaseDate(), tag: tagName ())
 }
 
