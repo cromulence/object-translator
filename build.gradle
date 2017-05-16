@@ -391,7 +391,7 @@ task copyBintrayTemplate (type: Copy) {
   into projectDir
   include 'bintray.json.template'
   rename { file -> 'bintray.json' }
-  expand (version: version, date: releaseDate(), tag: tagName ())
+  expand (version: project.version, date: releaseDate(), tag: tagName ())
 }
 
 task printTasks << {
