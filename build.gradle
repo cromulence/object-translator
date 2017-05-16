@@ -34,8 +34,6 @@ apply plugin: 'maven'
 ext {
     // Project constants
 
-    majorMinorVersion = "1.9"
-
     /*
      * Dependencies can be named so that sub-projects can reference consistent version of them.
      * dependencies {
@@ -68,6 +66,8 @@ ext {
 }
 
 group = 'net.cromulence'
+
+jar.dependsOn("getProjectVersion")
 
 //Section needed by the above com.gradle.build-scan plugin that was added
 buildScan {
@@ -379,23 +379,23 @@ task getProjectVersion << {
 
     println "Travis tag build"
 
-    if(tagName.startsWith(ext.majorMinorVersion)) {
+    if(tagName.startsWith("${majorMinorVersion}")) {
       //we're building a tag in line with the current expected version'
       project.version = tagName
       println "Version as expected ${project.version}"
     } else {
       // name is messed up
-      project.version = ext.majorMinorVersion + '.' + tagName
+      project.version = "${majorMinorVersion}.${tagName}"
       println "Version not as expected: ${project.version}"
     }
   } else if(System.getenv("TRAVIS") != null && System.getenv("TRAVIS").length() > 0) {
   } else if(System.getenv("TRAVIS") != null && System.getenv("TRAVIS").length() > 0) {
     // travis master build
-    project.version = ext.majorMinorVersion + '-SNAPSHOT'
+    project.version = "${majorMinorVersion}-SNAPSHOT"
     println "Building master ${project.version}"
   } else {
     //local build
-    project.version = ext.majorMinorVersion + '-SNAPSHOT'
+    project.version = "${majorMinorVersion}-SNAPSHOT"
     println "Building local ${project.version}"
   }
 }
