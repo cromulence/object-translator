@@ -69,33 +69,6 @@ ext {
 
 group = 'net.cromulence'
 
-// is there a travis tag?
-if(System.getenv("TRAVIS_TAG") != null && System.getenv("TRAVIS_TAG").length() > 0) {
-  // we are building a tag on travis
-  String tagName = System.getenv("TRAVIS_TAG")
-
-  println("Travis tag build")
-
-  if(tagName.startsWith(ext.majorMinorVersion)) {
-    //we're building a tag in line with the current expected version'
-    project.version = tagName
-    println("Version as expected " + project.version)
-  } else {
-    // name is messed up
-    project.version = ext.majorMinorVersion + '.' + tagName
-    println("Version not as expected: " + project.version)
-  }
-} else if(System.getenv("TRAVIS") != null && System.getenv("TRAVIS").length() > 0) {
-} else if(System.getenv("TRAVIS") != null && System.getenv("TRAVIS").length() > 0) {
-  // travis master build
-  project.version = ext.majorMinorVersion + '-SNAPSHOT'
-  println("Building master " + project.version)
-} else {
-  //local build
-  project.version = ext.majorMinorVersion + '-SNAPSHOT'
-  println("Building local " + project.version)
-}
-
 //Section needed by the above com.gradle.build-scan plugin that was added
 buildScan {
     licenseAgreementUrl = 'https://gradle.com/terms-of-service'
@@ -266,6 +239,8 @@ subprojects {
     
 
    assemble.dependsOn('copyBintrayTemplate')
+  assemble.dependsOn('getProjectVersion')
+
    //assemble.dependsOn('syncJars')
 
    test{
@@ -304,6 +279,8 @@ subprojects {
       }
    }
 
+
+  build.dependsOn('getProjectVersion')
    //we only want to upload if the build passed first..ie. tests, etc.
    uploadArchives.dependsOn('build')
    uploadArchives {
@@ -386,13 +363,43 @@ promoteRepository.doFirst {
   println("done sleeping go promote repo now");
 }
 
-task copyBintrayTemplate (type: Copy) {
+task copyBintrayTemplate (type: Copy,  dependsOn: 'getProjectVersion') {
   from projectDir
   into projectDir
   include 'bintray.json.template'
   rename { file -> 'bintray.json' }
   expand (version: project.version, date: releaseDate(), tag: tagName ())
 }
+
+task getProjectVersion << {
+// is there a travis tag?
+  if(System.getenv("TRAVIS_TAG") != null && System.getenv("TRAVIS_TAG").length() > 0) {
+    // we are building a tag on travis
+    String tagName = System.getenv("TRAVIS_TAG")
+
+    println("Travis tag build")
+
+    if(tagName.startsWith(ext.majorMinorVersion)) {
+      //we're building a tag in line with the current expected version'
+      project.version = tagName
+      println("Version as expected " + project.version)
+    } else {
+      // name is messed up
+      project.version = ext.majorMinorVersion + '.' + tagName
+      println("Version not as expected: " + project.version)
+    }
+  } else if(System.getenv("TRAVIS") != null && System.getenv("TRAVIS").length() > 0) {
+  } else if(System.getenv("TRAVIS") != null && System.getenv("TRAVIS").length() > 0) {
+    // travis master build
+    project.version = ext.majorMinorVersion + '-SNAPSHOT'
+    println("Building master " + project.version)
+  } else {
+    //local build
+    project.version = ext.majorMinorVersion + '-SNAPSHOT'
+    println("Building local " + project.version)
+  }
+}
+
 
 task printTasks << {
     project.tasks.collect { task -> println("task="+task+" dependsOn="+task.dependsOn) }
