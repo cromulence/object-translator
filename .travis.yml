@@ -3,7 +3,7 @@ jdk:
 - oraclejdk8
 before_deploy:
 - "./gradlew generatePomFileForMavenPublication"
-- "./gradlew --stacktrace copyBintrayTemplate"
+- "./gradlew --stacktrace getProjectVersion copyBintrayTemplate"
 deploy:
 - provider: s3
   upload-dir: output
