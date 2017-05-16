@@ -68,7 +68,6 @@ ext {
 group = 'net.cromulence'
 
 jar.dependsOn("getProjectVersion")
-copyBintrayTemplate.dependsOn("getProjectVersion")
 
 //Section needed by the above com.gradle.build-scan plugin that was added
 buildScan {
@@ -364,7 +363,7 @@ promoteRepository.doFirst {
   println("done sleeping go promote repo now");
 }
 
-task copyBintrayTemplate (type: Copy,  dependsOn: 'getProjectVersion') {
+task copyBintrayTemplate (type: Copy,  dependsOn: getProjectVersion) {
   from projectDir
   into projectDir
   include 'bintray.json.template'
