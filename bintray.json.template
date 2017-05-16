@@ -47,7 +47,7 @@
     "files": [
         {
             "includePattern": "output/libs/(.*jar)\$",
-            "uploadPattern": "net/cromulence/object-translator/${version}/\$1"
+            "uploadPattern": "${uploadPattern}"
         }
     ],
     "publish": true
