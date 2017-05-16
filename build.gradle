@@ -363,7 +363,7 @@ promoteRepository.doFirst {
   println("done sleeping go promote repo now");
 }
 
-task copyBintrayTemplate (type: Copy,  dependsOn: getProjectVersion) {
+task copyBintrayTemplate (type: Copy,  dependsOn: "getProjectVersion") {
   from projectDir
   into projectDir
   include 'bintray.json.template'
