@@ -377,26 +377,26 @@ task getProjectVersion << {
     // we are building a tag on travis
     String tagName = System.getenv("TRAVIS_TAG")
 
-    println("Travis tag build")
+    System.out.println("Travis tag build")
 
     if(tagName.startsWith(ext.majorMinorVersion)) {
       //we're building a tag in line with the current expected version'
       project.version = tagName
-      println("Version as expected " + project.version)
+      System.out.println("Version as expected " + project.version)
     } else {
       // name is messed up
       project.version = ext.majorMinorVersion + '.' + tagName
-      println("Version not as expected: " + project.version)
+      System.out.println("Version not as expected: " + project.version)
     }
   } else if(System.getenv("TRAVIS") != null && System.getenv("TRAVIS").length() > 0) {
   } else if(System.getenv("TRAVIS") != null && System.getenv("TRAVIS").length() > 0) {
     // travis master build
     project.version = ext.majorMinorVersion + '-SNAPSHOT'
-    println("Building master " + project.version)
+    System.out.println("Building master " + project.version)
   } else {
     //local build
     project.version = ext.majorMinorVersion + '-SNAPSHOT'
-    println("Building local " + project.version)
+    System.out.println("Building local " + project.version)
   }
 }
 
