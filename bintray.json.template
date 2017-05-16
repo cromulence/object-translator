@@ -22,10 +22,10 @@
        In case the version already exists on Bintray, only the name fields is mandatory. */
 
     "version": {
-        "name": "{version}",
-        "desc": "Release {version}",
-        "released": "{date}",
-        "vcs_tag": "{tag}",
+        "name": "${version}",
+        "desc": "Release ${version}",
+        "released": "${date}",
+        "vcs_tag": "${tag}",
         "gpgSign": false
     },
 
