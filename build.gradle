@@ -68,6 +68,7 @@ ext {
 group = 'net.cromulence'
 
 jar.dependsOn("getProjectVersion")
+copyBintrayTemplate.dependsOn("getProjectVersion")
 
 //Section needed by the above com.gradle.build-scan plugin that was added
 buildScan {
