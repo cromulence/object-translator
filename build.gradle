@@ -368,7 +368,7 @@ task copyBintrayTemplate (type: Copy,  dependsOn: "getProjectVersion") {
   into "${projectDir}/output"
   include 'bintray.json.template'
   rename { file -> 'bintray2.json' }
-  expand (version: project.version, date: releaseDate(), tag: tagName (), uploadPattern:"net/cromulence/object-translator/${project.version}/\$1")
+  expand (version: "${project.version}", date: releaseDate(), tag: tagName (), uploadPattern:"net/cromulence/object-translator/${project.version}/\$1")
 }
 
 task getProjectVersion << {
@@ -413,6 +413,36 @@ task printTasks << {
 }
 
 task release()
+
+def projectVersion() {
+  if(System.getenv("TRAVIS_TAG") != null && System.getenv("TRAVIS_TAG").length() > 0) {
+    // we are building a tag on travis
+    String tagName = System.getenv("TRAVIS_TAG")
+
+    println "Travis tag build"
+
+    if(tagName.startsWith("${majorMinorVersion}")) {
+      //we're building a tag in line with the current expected version'
+      project.version = tagName
+      println "Version as expected ${project.version}"
+    } else {
+      // name is messed up
+      project.version = "${majorMinorVersion}.${tagName}"
+      println "Version not as expected: ${project.version}"
+    }
+  } else if(System.getenv("TRAVIS") != null && System.getenv("TRAVIS").length() > 0) {
+    // travis master build
+    project.version = "${majorMinorVersion}-SNAPSHOT"
+    println "Building master ${project.version}"
+  } else {
+    //local build
+    project.version = "${majorMinorVersion}-SNAPSHOT"
+    println "Building local ${project.version}"
+  }
+
+  println "Returning${project.version}"
+  return project.version
+}
 
 def releaseDate() {
   new SimpleDateFormat("yyyy-MM-dd").format (new Date())
