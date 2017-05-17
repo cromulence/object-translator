@@ -368,7 +368,7 @@ task copyBintrayTemplate (type: Copy,  dependsOn: "getProjectVersion") {
   into "${projectDir}/output"
   include 'bintray.json.template'
   rename { file -> 'bintray2.json' }
-  expand (version: "${project.version}", date: releaseDate(), tag: tagName (), uploadPattern:"net/cromulence/object-translator/${project.version}/\$1")
+  expand (version: projectVersion(), date: releaseDate(), tag: tagName (), uploadPattern:"net/cromulence/object-translator/${project.version}/\$1")
 }
 
 task getProjectVersion << {
