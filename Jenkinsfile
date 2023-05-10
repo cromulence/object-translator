@@ -34,7 +34,7 @@ pipeline {
         stage('Publish') {
             steps {
                 script {
-                    withCredentials([file(credentialsId: 'gcpgcr', variable: 'GC_KEY')]) {
+                    withCredentials([file(credentialsId: 'cromulence-srvcacc-jsonAccessKey', variable: 'GC_KEY')]) {
 
                         withEnv(["GOOGLE_APPLICATION_CREDENTIALS=${GC_KEY}"]) {
                             withGradle {
