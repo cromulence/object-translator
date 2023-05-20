@@ -64,8 +64,6 @@ repositories {
     mavenCentral()
 }
 
-group = 'net.cromulence'
-
 jar.dependsOn("getProjectVersion")
 
 //Section needed by the above com.gradle.build-scan plugin that was added
@@ -84,6 +82,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             groupId  gavGroup
+            artifactId gavArtifact
             from components.java
         }
     }
@@ -282,7 +281,14 @@ task getProjectVersion {
             println "Building master ${project.version}"
         } else if (System.getenv("BUILD_NUMBER") != null && System.getenv("BUILD_NUMBER").length() > 0) {
             // jenkins master build
-            project.version = "${majorMinorVersion}-SNAPSHOT"
+            println "Jenkins build"
+
+            project.version = "${majorMinorVersion}.${System.getenv("BUILD_NUMBER")}"
+
+            if (!"master".equals(System.getenv("BRANCH")) {
+                project.version = "${BRANCH}-${project.version}"
+            }
+
             println "Building master ${project.version}"
         } else {
             //local build
