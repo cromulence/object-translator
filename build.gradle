@@ -277,7 +277,7 @@ allprojects {
 
         project.version = "${majorMinorVersion}.${System.getenv("BUILD_NUMBER")}"
 
-        if (!"master".equals(System.getenv("BRANCH")) {
+        if (!"master".equals(System.getenv("BRANCH"))) {
             project.version = "${BRANCH}-${project.version}"
         }
 
@@ -297,7 +297,7 @@ allprojects {
     }
   }
 
-  task release()
+//  task release()
 
   def projectVersion() {
     if(System.getenv("TRAVIS_TAG") != null && System.getenv("TRAVIS_TAG").length() > 0) {
