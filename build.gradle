@@ -89,13 +89,6 @@ publishing {
 }
 
 
-allprojects {
-   apply plugin: 'jacoco' //code coverage
-
-   jacoco {
-      toolVersion = '0.7.1.201405082137'
-   }
-}
 
 apply plugin: 'maven-publish'
 
@@ -110,6 +103,11 @@ allprojects {
    apply plugin: 'eclipse'
    apply plugin: 'idea'
    apply plugin: 'maven-publish'
+   apply plugin: 'jacoco' //code coverage
+
+   jacoco {
+      toolVersion = '0.7.1.201405082137'
+   }
 
    ext {
       //This is an input directory that we read jars from if they are not in a repo somewhere
@@ -174,8 +172,6 @@ allprojects {
       }
    }
 
-
-
    task javadocJar(type: Jar, dependsOn: javadoc) {
       classifier = 'javadoc'
       from 'build/docs/javadoc'
@@ -216,8 +212,7 @@ allprojects {
        }
    }
 
-  assemble.dependsOn('getProjectVersion')
-
+   assemble.dependsOn('getProjectVersion')
 
    test{
       beforeTest{ descr ->
@@ -244,103 +239,101 @@ allprojects {
   build.dependsOn('getProjectVersion')
 
 
-}
-
-
-task getProjectVersion {
+  task getProjectVersion {
     doLast {
 // is there a travis tag?
 
-        println "getProjectVersion in"
-        println "travistag"
-        println System.getenv("TRAVIS_TAG")
-        println "travis"
-        println System.getenv("TRAVIS")
-        println "getProjectVersion carry on"
-        println "BUILD_NUMBER"
-        println System.getenv("BUILD_NUMBER")
+      println "getProjectVersion in"
+      println "travistag"
+      println System.getenv("TRAVIS_TAG")
+      println "travis"
+      println System.getenv("TRAVIS")
+      println "getProjectVersion carry on"
+      println "BUILD_NUMBER"
+      println System.getenv("BUILD_NUMBER")
 
-        if (System.getenv("TRAVIS_TAG") != null && System.getenv("TRAVIS_TAG").length() > 0) {
-            // we are building a tag on travis
-            String tagName = System.getenv("TRAVIS_TAG")
+      if (System.getenv("TRAVIS_TAG") != null && System.getenv("TRAVIS_TAG").length() > 0) {
+        // we are building a tag on travis
+        String tagName = System.getenv("TRAVIS_TAG")
 
-            println "Travis tag build"
+        println "Travis tag build"
 
-            if (tagName.startsWith("${majorMinorVersion}")) {
-                //we're building a tag in line with the current expected version'
-                project.version = tagName
-                println "Version as expected ${project.version}"
-            } else {
-                // name is messed up
-                project.version = "${majorMinorVersion}.${tagName}"
-                println "Version not as expected: ${project.version}"
-            }
-        } else if (System.getenv("TRAVIS") != null && System.getenv("TRAVIS").length() > 0) {
-            // travis master build
-            project.version = "${majorMinorVersion}-SNAPSHOT"
-            println "Building master ${project.version}"
-        } else if (System.getenv("BUILD_NUMBER") != null && System.getenv("BUILD_NUMBER").length() > 0) {
-            // jenkins master build
-            println "Jenkins build"
-
-            project.version = "${majorMinorVersion}.${System.getenv("BUILD_NUMBER")}"
-
-            if (!"master".equals(System.getenv("BRANCH")) {
-                project.version = "${BRANCH}-${project.version}"
-            }
-
-            println "Building master ${project.version}"
+        if (tagName.startsWith("${majorMinorVersion}")) {
+          //we're building a tag in line with the current expected version'
+          project.version = tagName
+          println "Version as expected ${project.version}"
         } else {
-            //local build
-            project.version = "${majorMinorVersion}-SNAPSHOT"
-            println "Building local ${project.version}"
+          // name is messed up
+          project.version = "${majorMinorVersion}.${tagName}"
+          println "Version not as expected: ${project.version}"
         }
+      } else if (System.getenv("TRAVIS") != null && System.getenv("TRAVIS").length() > 0) {
+        // travis master build
+        project.version = "${majorMinorVersion}-SNAPSHOT"
+        println "Building master ${project.version}"
+      } else if (System.getenv("BUILD_NUMBER") != null && System.getenv("BUILD_NUMBER").length() > 0) {
+        // jenkins master build
+        println "Jenkins build"
+
+        project.version = "${majorMinorVersion}.${System.getenv("BUILD_NUMBER")}"
+
+        if (!"master".equals(System.getenv("BRANCH")) {
+            project.version = "${BRANCH}-${project.version}"
+        }
+
+        println "Building master ${project.version}"
+      } else {
+        //local build
+        project.version = "${majorMinorVersion}-SNAPSHOT"
+        println "Building local ${project.version}"
+      }
     }
-}
-
-
-task printTasks {
-    doLast {
-        project.tasks.collect { task -> println("task=" + task + " dependsOn=" + task.dependsOn) }
-    }
-}
-
-task release()
-
-def projectVersion() {
-  if(System.getenv("TRAVIS_TAG") != null && System.getenv("TRAVIS_TAG").length() > 0) {
-    // we are building a tag on travis
-    String tagName = System.getenv("TRAVIS_TAG")
-
-    println "Travis tag build"
-
-    if(tagName.startsWith("${majorMinorVersion}")) {
-      //we're building a tag in line with the current expected version'
-      project.version = tagName
-      println "Version as expected ${project.version}"
-    } else {
-      // name is messed up
-      project.version = "${majorMinorVersion}.${tagName}"
-      println "Version not as expected: ${project.version}"
-    }
-  } else if(System.getenv("TRAVIS") != null && System.getenv("TRAVIS").length() > 0) {
-    // travis master build
-    project.version = "${majorMinorVersion}-SNAPSHOT"
-    println "Building master ${project.version}"
-  } else {
-    //local build
-    project.version = "${majorMinorVersion}-SNAPSHOT"
-    println "Building local ${project.version}"
   }
 
-  println "Returning ${project.version}"
-  return project.version
-}
 
-def releaseDate() {
-  new SimpleDateFormat("yyyy-MM-dd").format (new Date())
-}
+  task printTasks {
+    doLast {
+      project.tasks.collect { task -> println("task=" + task + " dependsOn=" + task.dependsOn) }
+    }
+  }
 
-def tagName() {
-  System.getenv("TRAVIS_TAG")
+  task release()
+
+  def projectVersion() {
+    if(System.getenv("TRAVIS_TAG") != null && System.getenv("TRAVIS_TAG").length() > 0) {
+      // we are building a tag on travis
+      String tagName = System.getenv("TRAVIS_TAG")
+
+      println "Travis tag build"
+
+      if(tagName.startsWith("${majorMinorVersion}")) {
+        //we're building a tag in line with the current expected version'
+        project.version = tagName
+        println "Version as expected ${project.version}"
+      } else {
+        // name is messed up
+        project.version = "${majorMinorVersion}.${tagName}"
+        println "Version not as expected: ${project.version}"
+      }
+    } else if(System.getenv("TRAVIS") != null && System.getenv("TRAVIS").length() > 0) {
+      // travis master build
+      project.version = "${majorMinorVersion}-SNAPSHOT"
+      println "Building master ${project.version}"
+    } else {
+      //local build
+      project.version = "${majorMinorVersion}-SNAPSHOT"
+      println "Building local ${project.version}"
+    }
+
+    println "Returning ${project.version}"
+    return project.version
+  }
+
+  def releaseDate() {
+    new SimpleDateFormat("yyyy-MM-dd").format (new Date())
+  }
+
+  def tagName() {
+    System.getenv("TRAVIS_TAG")
+  }
 }
