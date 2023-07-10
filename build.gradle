@@ -72,6 +72,16 @@ buildScan {
     licenseAgree = 'yes'
 }
 
+ext {
+      //This is an input directory that we read jars from if they are not in a repo somewhere
+      fixedLibDir = file('lib')
+      toStagingDir = file(new File(buildDir, 'alljars'))
+      github_org = 'cromulence'
+      project_name = 'object-translator'
+   }
+
+
+
 
 publishing {
     repositories {
@@ -97,7 +107,7 @@ dependencies {
 }
 
 
-allprojects {
+//allprojects {
    apply plugin: 'java'
    //apply plugin: 'checkstyle'
    apply plugin: 'eclipse'
@@ -109,13 +119,13 @@ allprojects {
       toolVersion = '0.7.1.201405082137'
    }
 
-   ext {
-      //This is an input directory that we read jars from if they are not in a repo somewhere
-      fixedLibDir = file('lib')
-      toStagingDir = file(new File(buildDir, 'alljars'))
-      github_org = 'cromulence'
-      project_name = 'object-translator'
-   }
+//   ext {
+//      //This is an input directory that we read jars from if they are not in a repo somewhere
+//      fixedLibDir = file('lib')
+//      toStagingDir = file(new File(buildDir, 'alljars'))
+//      github_org = 'cromulence'
+//      project_name = 'object-translator'
+//   }
    //doing this modifies the mvn artifact id and we can't seem to reset it
    //archivesBaseName = "webpieces-${it.name}"
 
@@ -336,4 +346,4 @@ allprojects {
   def tagName() {
     System.getenv("TRAVIS_TAG")
   }
-}
+//}
